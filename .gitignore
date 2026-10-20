@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+
+# Local environment and data
+.env
+.env.local
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Generated media (fixtures are generated, never committed)
+fixtures/generated/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
