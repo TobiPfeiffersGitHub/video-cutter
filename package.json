@@ -1,0 +1,16 @@
+{
+  "name": "videocut",
+  "private": true,
+  "version": "0.1.0",
+  "description": "videocut: a local-first video editor",
+  "license": "MIT",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "test": "node scripts/test.mjs",
+    "licenses": "node scripts/check-licenses.mjs"
+  }
+}
