@@ -8,6 +8,7 @@ const npm = npmCommand();
 run(process.execPath, ["--test", "scripts/**/*.test.mjs"], { cwd: ROOT });
 run(venvPython, ["-m", "ruff", "check", "."], { cwd: BACKEND });
 run(venvPython, ["-m", "pytest"], { cwd: BACKEND });
+run(process.execPath, [join(ROOT, "scripts", "generate-contract.mjs"), "--check"], { cwd: ROOT });
 run(npm, ["run", "lint"], { cwd: FRONTEND });
 run(npm, ["run", "typecheck"], { cwd: FRONTEND });
 run(npm, ["test"], { cwd: FRONTEND });

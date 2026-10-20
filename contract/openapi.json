@@ -1,0 +1,404 @@
+{
+  "components": {
+    "schemas": {
+      "Crop": {
+        "additionalProperties": false,
+        "properties": {
+          "h": {
+            "maximum": 1,
+            "minimum": 0.05,
+            "title": "H",
+            "type": "number"
+          },
+          "w": {
+            "maximum": 1,
+            "minimum": 0.05,
+            "title": "W",
+            "type": "number"
+          },
+          "x": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "w",
+          "h"
+        ],
+        "title": "Crop",
+        "type": "object"
+      },
+      "Edl": {
+        "additionalProperties": false,
+        "properties": {
+          "crop": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Crop"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "fps": {
+            "$ref": "#/components/schemas/Fps"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/Segment"
+            },
+            "title": "Segments",
+            "type": "array"
+          },
+          "version": {
+            "const": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "fps",
+          "segments"
+        ],
+        "title": "Edl",
+        "type": "object"
+      },
+      "Encoders": {
+        "properties": {
+          "available": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Available",
+            "type": "array"
+          },
+          "hardware_opt_in": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hardware Opt In"
+          },
+          "selected": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SelectedEncoder"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "available",
+          "selected",
+          "hardware_opt_in"
+        ],
+        "title": "Encoders",
+        "type": "object"
+      },
+      "Fps": {
+        "additionalProperties": false,
+        "properties": {
+          "den": {
+            "description": "Frame rate denominator, e.g. 1001.",
+            "minimum": 1,
+            "title": "Den",
+            "type": "integer"
+          },
+          "num": {
+            "description": "Frame rate numerator, e.g. 30000.",
+            "minimum": 1,
+            "title": "Num",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "num",
+          "den"
+        ],
+        "title": "Fps",
+        "type": "object"
+      },
+      "HealthProblem": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "hint": {
+            "title": "Hint",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "hint"
+        ],
+        "title": "HealthProblem",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "encoders": {
+            "$ref": "#/components/schemas/Encoders"
+          },
+          "ffmpeg": {
+            "$ref": "#/components/schemas/ToolStatus"
+          },
+          "ffprobe": {
+            "$ref": "#/components/schemas/ToolStatus"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/Limits"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/HealthProblem"
+            },
+            "title": "Problems",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "degraded"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "ffmpeg",
+          "ffprobe",
+          "encoders",
+          "limits",
+          "problems"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "Limits": {
+        "properties": {
+          "crop_min_size": {
+            "title": "Crop Min Size",
+            "type": "number"
+          },
+          "max_upload_bytes": {
+            "title": "Max Upload Bytes",
+            "type": "integer"
+          },
+          "speed_max": {
+            "title": "Speed Max",
+            "type": "number"
+          },
+          "speed_min": {
+            "title": "Speed Min",
+            "type": "number"
+          }
+        },
+        "required": [
+          "max_upload_bytes",
+          "speed_min",
+          "speed_max",
+          "crop_min_size"
+        ],
+        "title": "Limits",
+        "type": "object"
+      },
+      "Segment": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "description": "Last frame, exclusive.",
+            "minimum": 1,
+            "title": "End",
+            "type": "integer"
+          },
+          "id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "mute": {
+            "default": false,
+            "title": "Mute",
+            "type": "boolean"
+          },
+          "speed": {
+            "default": 1.0,
+            "maximum": 16.0,
+            "minimum": 0.25,
+            "title": "Speed",
+            "type": "number"
+          },
+          "start": {
+            "description": "First frame, inclusive.",
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "start",
+          "end"
+        ],
+        "title": "Segment",
+        "type": "object"
+      },
+      "SelectedEncoder": {
+        "properties": {
+          "fallback": {
+            "title": "Fallback",
+            "type": "boolean"
+          },
+          "hardware": {
+            "title": "Hardware",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "required": [
+          "name",
+          "hardware",
+          "fallback",
+          "note"
+        ],
+        "title": "SelectedEncoder",
+        "type": "object"
+      },
+      "ToolStatus": {
+        "properties": {
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "available",
+          "path",
+          "version"
+        ],
+        "title": "ToolStatus",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "videocut",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "description": "Always 200: missing tools are reported in `problems` with a fix, not as an error.",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Tool and limit status",
+        "tags": [
+          "meta"
+        ]
+      }
+    },
+    "/api/v1/ping": {
+      "get": {
+        "description": "Liveness check that does not depend on FFmpeg.",
+        "operationId": "ping_api_v1_ping_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Ping Api V1 Ping Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ping",
+        "tags": [
+          "meta"
+        ]
+      }
+    }
+  }
+}

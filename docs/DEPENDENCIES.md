@@ -22,6 +22,7 @@ license check.
 | Package | License | Purpose |
 | --- | --- | --- |
 | pytest | MIT | Test runner |
+| jsonschema | MIT | Checks `contract/edl.schema.json` against the Pydantic models in tests (pulls attrs, referencing, rpds-py, jsonschema-specifications, all MIT; wheels only) |
 | httpx | BSD-3-Clause | Required by FastAPI's `TestClient` |
 | ruff | MIT | Linting |
 | pip-licenses | MIT | Python license-policy check |
@@ -43,6 +44,7 @@ license check.
 | @testing-library/react, /dom, /jest-dom | MIT | Component testing helpers |
 | eslint, @eslint/js, typescript-eslint, eslint-plugin-react-hooks, globals | MIT | Linting |
 | @types/react, @types/react-dom, @types/node | MIT | Type definitions |
+| openapi-typescript | MIT | Generates `src/api/schema.d.ts` from `contract/openapi.json` |
 | license-checker-rseidelsohn | BSD-3-Clause | npm license-policy check (maintained fork of `license-checker`) |
 
 ## License exceptions
@@ -64,7 +66,7 @@ allow list; each exception names exact packages and license strings.
 
 | Tool | License | Purpose |
 | --- | --- | --- |
-| FFmpeg / ffprobe | LGPL or GPL depending on build | Installed by the user; used from a later package. See [LICENSING.md](LICENSING.md) |
+| FFmpeg / ffprobe | LGPL or GPL depending on build | Installed by the user; discovered by `/api/v1/health`. See [LICENSING.md](LICENSING.md) |
 
 ## GitHub Actions
 
@@ -78,5 +80,9 @@ Pinned to commit SHAs in `.github/workflows/ci.yml`.
 
 ## Known notes
 
+- `openapi-typescript` 7.x declares a peer dependency on TypeScript 5, while the
+  project uses TypeScript 6. `frontend/package.json` has an `overrides` entry that
+  resolves that peer to the project's TypeScript. Remove it once upstream widens
+  the range.
 - `npm ci` prints a deprecation warning for `glob@10` pulled in by the license
   checker. It is a development-only tool and is not part of the built app.

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://videocut.local/contract/edl.schema.json",
+  "title": "Edl",
+  "description": "videocut Edit Decision List v1. Times are integer frames at a rational fps; start is inclusive, end is exclusive. Anything outside a segment is cut. Rules a JSON Schema cannot express are enforced by core validation (backend/app/core/edl.py): segments sorted by start and non-overlapping, unique segment ids, crop x + w <= 1 and y + h <= 1, and source-dependent limits (end <= total_frames, fps equal to the source fps). An empty segments array is valid but not exportable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "fps", "segments"],
+  "properties": {
+    "version": { "const": 1, "type": "integer" },
+    "fps": { "$ref": "#/$defs/Fps" },
+    "segments": { "type": "array", "items": { "$ref": "#/$defs/Segment" } },
+    "crop": {
+      "description": "Normalized to the displayed frame (after rotation). null or absent means no crop.",
+      "anyOf": [{ "$ref": "#/$defs/Crop" }, { "type": "null" }],
+      "default": null
+    }
+  },
+  "$defs": {
+    "Fps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["num", "den"],
+      "properties": {
+        "num": { "type": "integer", "minimum": 1 },
+        "den": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "Segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "start", "end"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "start": { "type": "integer", "minimum": 0, "description": "First frame, inclusive." },
+        "end": { "type": "integer", "minimum": 1, "description": "Last frame, exclusive. Must be greater than start." },
+        "speed": { "type": "number", "minimum": 0.25, "maximum": 16, "default": 1.0 },
+        "mute": { "type": "boolean", "default": false }
+      }
+    },
+    "Crop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "w", "h"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "w": { "type": "number", "minimum": 0.05, "maximum": 1 },
+        "h": { "type": "number", "minimum": 0.05, "maximum": 1 }
+      }
+    }
+  }
+}

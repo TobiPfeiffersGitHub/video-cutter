@@ -1,0 +1,3 @@
+# Generated and contract files must be byte-identical on every platform.
+contract/** text eol=lf
+frontend/src/api/schema.d.ts text eol=lf

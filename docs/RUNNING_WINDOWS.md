@@ -18,16 +18,29 @@ node --version
 ffmpeg -version
 ```
 
-FFmpeg is not needed to start the current application shell, but later packages
-(health check, rendering, proxies, export) require it. If it is not on `PATH`,
-set `FFMPEG_PATH` and `FFPROBE_PATH` to the full executable paths (see `.env.example`).
+The app starts without FFmpeg, but `GET /api/v1/health` then reports
+`status: "degraded"` with the fix, and later packages (rendering, proxies, export)
+require it. If FFmpeg is not on `PATH`, set `FFMPEG_PATH` and `FFPROBE_PATH` to
+the executables or to their folder (paths containing spaces are fine). On
+Debian/Ubuntu install it with `sudo apt install ffmpeg`.
+
+Check what the backend found (with `npm run dev` running):
+
+```powershell
+curl http://127.0.0.1:8000/api/v1/health
+```
+
+Tools are discovered once at startup: restart the backend after installing FFmpeg.
+`VIDEOCUT_HARDWARE_ENCODER` (`h264_nvenc` or `h264_qsv`) opts in to a hardware
+encoder; it is off by default.
 
 ## Setup, start, test
 
 ```powershell
 npm run setup   # creates backend/.venv, installs pinned wheels and npm packages
 npm run dev     # backend on :8000, frontend on :5173 (open http://127.0.0.1:5173)
-npm test        # lint, type check, tests, production build, license policy
+npm test        # lint, type check, tests, production build, license policy, contract drift
+npm run contract  # regenerate contract/openapi.json and frontend/src/api/schema.d.ts
 ```
 
 Press `Ctrl+C` to stop; both the backend and the frontend are terminated.
