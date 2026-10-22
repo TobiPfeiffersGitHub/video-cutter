@@ -66,7 +66,7 @@ allow list; each exception names exact packages and license strings.
 
 | Tool | License | Purpose |
 | --- | --- | --- |
-| FFmpeg / ffprobe | LGPL or GPL depending on build | Installed by the user; discovered by `/api/v1/health`. See [LICENSING.md](LICENSING.md) |
+| FFmpeg / ffprobe | LGPL or GPL depending on build | Installed by the user; discovered by `/api/v1/health`; run by the media tests and (later) exports. CI installs it from the runner's package manager (Chocolatey on Windows, apt on Linux) only to run tests; nothing is redistributed. See [LICENSING.md](LICENSING.md) |
 
 ## GitHub Actions
 
@@ -77,6 +77,9 @@ Pinned to commit SHAs in `.github/workflows/ci.yml`.
 | actions/checkout | v7.0.1 |
 | actions/setup-node | v7.1.0 |
 | actions/setup-python | v7.0.0 |
+
+No new Python or npm dependency was added for the rendering core, golden tests, or
+fixtures; they use the standard library, Pydantic, jsonschema and pytest already listed.
 
 ## Known notes
 

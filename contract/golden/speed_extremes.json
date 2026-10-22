@@ -1,0 +1,99 @@
+{
+  "description": "0.25x, 16x, 3x and 1.5x: atempo chained inside 0.5..2.",
+  "probe": {
+    "duration_seconds": 60.0,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "width": 1920,
+    "height": 1080,
+    "rotation": 0,
+    "has_audio": true,
+    "vfr": false,
+    "video_codec": "h264",
+    "audio_codec": "aac"
+  },
+  "edl": {
+    "version": 1,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "segments": [
+      {
+        "id": "s1",
+        "start": 0,
+        "end": 60,
+        "speed": 0.25,
+        "mute": false
+      },
+      {
+        "id": "s2",
+        "start": 60,
+        "end": 300,
+        "speed": 16.0,
+        "mute": false
+      },
+      {
+        "id": "s3",
+        "start": 300,
+        "end": 420,
+        "speed": 3.0,
+        "mute": false
+      },
+      {
+        "id": "s4",
+        "start": 420,
+        "end": 480,
+        "speed": 1.5,
+        "mute": false
+      }
+    ],
+    "crop": null
+  },
+  "options": {
+    "format": "mp4",
+    "quality": "high",
+    "encoder": "libx264",
+    "input_path": "input.mp4",
+    "output_path": "output.mp4"
+  },
+  "expected_args": [
+    "-hide_banner",
+    "-nostdin",
+    "-y",
+    "-progress",
+    "pipe:1",
+    "-nostats",
+    "-i",
+    "input.mp4",
+    "-filter_complex",
+    "[0:v]fps=30000/1001,settb=AVTB,split=4[v0][v1][v2][v3];[v0]trim=start=0:end=2.002,setpts=(PTS-STARTPTS)/0.25,fps=30000/1001:round=near,tpad=stop=-1:stop_mode=clone,trim=end_frame=240[sv0];[v1]trim=start=2.002:end=10.01,setpts=(PTS-STARTPTS)/16,fps=30000/1001:round=up,tpad=stop=-1:stop_mode=clone,trim=end_frame=15[sv1];[v2]trim=start=10.01:end=14.014,setpts=(PTS-STARTPTS)/3,fps=30000/1001:round=up,tpad=stop=-1:stop_mode=clone,trim=end_frame=40[sv2];[v3]trim=start=14.014:end=16.016,setpts=(PTS-STARTPTS)/1.5,fps=30000/1001:round=up,tpad=stop=-1:stop_mode=clone,trim=end_frame=40[sv3];[0:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit=4[a0][a1][a2][a3];[a0]atrim=start=0:end=2.002,asetpts=PTS-STARTPTS,atempo=0.5,atempo=0.5,apad,atrim=end=8.008[sa0];[a1]atrim=start=2.002:end=10.01,asetpts=PTS-STARTPTS,atempo=2,atempo=2,atempo=2,atempo=2,apad,atrim=end=0.5005[sa1];[a2]atrim=start=10.01:end=14.014,asetpts=PTS-STARTPTS,atempo=2,atempo=1.5,apad,atrim=end=1.334667[sa2];[a3]atrim=start=14.014:end=16.016,asetpts=PTS-STARTPTS,atempo=1.5,apad,atrim=end=1.334667[sa3];[sv0][sa0][sv1][sa1][sv2][sa2][sv3][sa3]concat=n=4:v=1:a=1[vcat][aout];[vcat]format=yuv420p[vout]",
+    "-map",
+    "[vout]",
+    "-map",
+    "[aout]",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "medium",
+    "-crf",
+    "18",
+    "-pix_fmt",
+    "yuv420p",
+    "-fps_mode",
+    "cfr",
+    "-r",
+    "30000/1001",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-ar",
+    "48000",
+    "-movflags",
+    "+faststart",
+    "output.mp4"
+  ]
+}

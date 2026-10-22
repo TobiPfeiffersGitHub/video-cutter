@@ -88,3 +88,5 @@ start("frontend", process.execPath, [viteBin, "--host", host], FRONTEND);
 
 process.on("SIGINT", () => shutdown(0));
 process.on("SIGTERM", () => shutdown(0));
+// Closing the terminal sends SIGHUP; without this the detached children would be orphaned.
+process.on("SIGHUP", () => shutdown(0));

@@ -9,8 +9,10 @@ Licensed under MIT (see [LICENSE](LICENSE)).
 Early development. **Implemented:** a FastAPI backend with a liveness route and
 `GET /api/v1/health` (FFmpeg/ffprobe versions, encoders, limits), the EDL
 contract (JSON Schema, Pydantic models, frame/time helpers, generated OpenAPI and
-TypeScript types), a React/Vite/Tailwind application shell, and CI.
-**Not implemented yet:** rendering, upload, preview, timeline, editing, crop,
+TypeScript types), a tested FFmpeg argument builder with golden cases and
+generated fixtures (not wired to any route yet), a React/Vite/Tailwind application
+shell, and CI.
+**Not implemented yet:** running exports, upload, preview, timeline, editing, crop,
 export, projects, and authentication.
 
 ## Prerequisites
@@ -18,7 +20,8 @@ export, projects, and authentication.
 - Python 3.11+ (CI uses 3.12)
 - Node.js 20.19+ or 22.12+ (see `.nvmrc`)
 - FFmpeg and ffprobe, installed separately (not bundled; the app starts without it
-  but `/api/v1/health` reports `degraded`). Windows: `winget install Gyan.FFmpeg`. Debian/Ubuntu:
+  but `/api/v1/health` reports `degraded`). `npm test` **requires** them, with the
+  libx264 and aac encoders, and fails (not skips) the media tests without them. Windows: `winget install Gyan.FFmpeg`. Debian/Ubuntu:
   `sudo apt install ffmpeg`. See [docs/RUNNING_WINDOWS.md](docs/RUNNING_WINDOWS.md).
 
 ## Quick start
@@ -26,7 +29,8 @@ export, projects, and authentication.
 ```
 npm run setup   # one-time: Python venv + pinned wheels + npm packages
 npm run dev     # backend http://127.0.0.1:8000, frontend http://127.0.0.1:5173
-npm test        # backend + frontend lint/tests, type check, build, license policy
+npm test        # backend (incl. real-FFmpeg media tests) + frontend checks, build, licenses
+npm run fixtures  # optional: write the generated test clips to backend/tests/.generated/
 ```
 
 `npm run dev` starts both servers and `Ctrl+C` stops both. The frontend dev
@@ -36,7 +40,7 @@ overrides; the scripts read ordinary environment variables
 
 ## Troubleshooting
 
-- **FFmpeg not found** (`/api/v1/health` shows `degraded` with a hint): install it
+- **FFmpeg not found** (`/api/v1/health` shows `degraded` with a hint; `npm test` fails the media tests): install it
   and open a new terminal, or set `FFMPEG_PATH` / `FFPROBE_PATH` to the
   executables. Restart the backend afterwards, since tools are discovered once at startup.
 - **Port in use:** `npm run dev` refuses to start and names the port. Stop the

@@ -1,0 +1,83 @@
+{
+  "description": "Crop rounds half up then down to even.",
+  "probe": {
+    "duration_seconds": 60.0,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "width": 1920,
+    "height": 1080,
+    "rotation": 0,
+    "has_audio": true,
+    "vfr": false,
+    "video_codec": "h264",
+    "audio_codec": "aac"
+  },
+  "edl": {
+    "version": 1,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "segments": [
+      {
+        "id": "s1",
+        "start": 0,
+        "end": 300,
+        "speed": 1.0,
+        "mute": false
+      }
+    ],
+    "crop": {
+      "x": 0.333,
+      "y": 0.125,
+      "w": 0.4,
+      "h": 0.5
+    }
+  },
+  "options": {
+    "format": "mp4",
+    "quality": "high",
+    "encoder": "libx264",
+    "input_path": "input.mp4",
+    "output_path": "output.mp4"
+  },
+  "expected_args": [
+    "-hide_banner",
+    "-nostdin",
+    "-y",
+    "-progress",
+    "pipe:1",
+    "-nostats",
+    "-i",
+    "input.mp4",
+    "-filter_complex",
+    "[0:v]fps=30000/1001,settb=AVTB[v0];[v0]trim=start=0:end=10.01,setpts=PTS-STARTPTS[sv0];[0:a]aformat=sample_rates=48000:channel_layouts=stereo[a0];[a0]atrim=start=0:end=10.01,asetpts=PTS-STARTPTS[sa0];[sv0][sa0]concat=n=1:v=1:a=1[vcat][aout];[vcat]crop=768:540:638:134,format=yuv420p[vout]",
+    "-map",
+    "[vout]",
+    "-map",
+    "[aout]",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "medium",
+    "-crf",
+    "18",
+    "-pix_fmt",
+    "yuv420p",
+    "-fps_mode",
+    "cfr",
+    "-r",
+    "30000/1001",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-ar",
+    "48000",
+    "-movflags",
+    "+faststart",
+    "output.mp4"
+  ]
+}

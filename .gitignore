@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 *.egg-info/
 .pytest_cache/
+.pytest_tmp/
 .ruff_cache/
 
 # Node
@@ -22,6 +23,7 @@ data/
 
 # Generated media (fixtures are generated, never committed)
 fixtures/generated/
+backend/tests/.generated/
 
 # Editors / OS
 .vscode/

@@ -1,0 +1,92 @@
+{
+  "description": "Three cuts at 1x, audio, no crop.",
+  "probe": {
+    "duration_seconds": 60.0,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "width": 1920,
+    "height": 1080,
+    "rotation": 0,
+    "has_audio": true,
+    "vfr": false,
+    "video_codec": "h264",
+    "audio_codec": "aac"
+  },
+  "edl": {
+    "version": 1,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "segments": [
+      {
+        "id": "s1",
+        "start": 0,
+        "end": 372,
+        "speed": 1.0,
+        "mute": false
+      },
+      {
+        "id": "s2",
+        "start": 600,
+        "end": 900,
+        "speed": 1.0,
+        "mute": false
+      },
+      {
+        "id": "s3",
+        "start": 1350,
+        "end": 1790,
+        "speed": 1.0,
+        "mute": false
+      }
+    ],
+    "crop": null
+  },
+  "options": {
+    "format": "mp4",
+    "quality": "high",
+    "encoder": "libx264",
+    "input_path": "input.mp4",
+    "output_path": "output.mp4"
+  },
+  "expected_args": [
+    "-hide_banner",
+    "-nostdin",
+    "-y",
+    "-progress",
+    "pipe:1",
+    "-nostats",
+    "-i",
+    "input.mp4",
+    "-filter_complex",
+    "[0:v]fps=30000/1001,settb=AVTB,split=3[v0][v1][v2];[v0]trim=start=0:end=12.4124,setpts=PTS-STARTPTS[sv0];[v1]trim=start=20.02:end=30.03,setpts=PTS-STARTPTS[sv1];[v2]trim=start=45.045:end=59.726333,setpts=PTS-STARTPTS[sv2];[0:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit=3[a0][a1][a2];[a0]atrim=start=0:end=12.4124,asetpts=PTS-STARTPTS[sa0];[a1]atrim=start=20.02:end=30.03,asetpts=PTS-STARTPTS[sa1];[a2]atrim=start=45.045:end=59.726333,asetpts=PTS-STARTPTS[sa2];[sv0][sa0][sv1][sa1][sv2][sa2]concat=n=3:v=1:a=1[vcat][aout];[vcat]format=yuv420p[vout]",
+    "-map",
+    "[vout]",
+    "-map",
+    "[aout]",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "medium",
+    "-crf",
+    "18",
+    "-pix_fmt",
+    "yuv420p",
+    "-fps_mode",
+    "cfr",
+    "-r",
+    "30000/1001",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-ar",
+    "48000",
+    "-movflags",
+    "+faststart",
+    "output.mp4"
+  ]
+}

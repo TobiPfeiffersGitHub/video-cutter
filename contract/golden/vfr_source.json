@@ -1,0 +1,85 @@
+{
+  "description": "VFR metadata: normalized to the project rate, CFR output.",
+  "probe": {
+    "duration_seconds": 60.0,
+    "fps": {
+      "num": 30,
+      "den": 1
+    },
+    "width": 1920,
+    "height": 1080,
+    "rotation": 0,
+    "has_audio": true,
+    "vfr": true,
+    "video_codec": "h264",
+    "audio_codec": "aac"
+  },
+  "edl": {
+    "version": 1,
+    "fps": {
+      "num": 30,
+      "den": 1
+    },
+    "segments": [
+      {
+        "id": "s1",
+        "start": 0,
+        "end": 200,
+        "speed": 1.0,
+        "mute": false
+      },
+      {
+        "id": "s2",
+        "start": 300,
+        "end": 500,
+        "speed": 1.0,
+        "mute": false
+      }
+    ],
+    "crop": null
+  },
+  "options": {
+    "format": "mp4",
+    "quality": "high",
+    "encoder": "libx264",
+    "input_path": "input.mp4",
+    "output_path": "output.mp4"
+  },
+  "expected_args": [
+    "-hide_banner",
+    "-nostdin",
+    "-y",
+    "-progress",
+    "pipe:1",
+    "-nostats",
+    "-i",
+    "input.mp4",
+    "-filter_complex",
+    "[0:v]fps=30/1,settb=AVTB,split=2[v0][v1];[v0]trim=start=0:end=6.666666,setpts=PTS-STARTPTS[sv0];[v1]trim=start=10:end=16.666666,setpts=PTS-STARTPTS[sv1];[0:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit=2[a0][a1];[a0]atrim=start=0:end=6.666666,asetpts=PTS-STARTPTS[sa0];[a1]atrim=start=10:end=16.666666,asetpts=PTS-STARTPTS[sa1];[sv0][sa0][sv1][sa1]concat=n=2:v=1:a=1[vcat][aout];[vcat]format=yuv420p[vout]",
+    "-map",
+    "[vout]",
+    "-map",
+    "[aout]",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "medium",
+    "-crf",
+    "18",
+    "-pix_fmt",
+    "yuv420p",
+    "-fps_mode",
+    "cfr",
+    "-r",
+    "30/1",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-ar",
+    "48000",
+    "-movflags",
+    "+faststart",
+    "output.mp4"
+  ]
+}

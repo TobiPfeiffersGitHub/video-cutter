@@ -41,12 +41,31 @@ jobs:
             backend/requirements.txt
             backend/requirements-dev.txt
 
+      # FFmpeg is an external tool (never bundled). The media tests fail, not skip, when it
+      # is missing, so provisioning is explicit. The runner images' package managers
+      # supply a build with libx264; the tests assert libx264 and aac are present.
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg --no-progress -y
+
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Show FFmpeg version
+        run: |
+          ffmpeg -hide_banner -version
+          ffprobe -hide_banner -version
+
       # Creates backend/.venv, installs Python packages with --only-binary=:all:
       # and frontend packages with npm ci.
       - name: Install dependencies
         run: npm run setup
 
-      # Backend lint and tests, frontend lint, type check, tests and production build,
-      # and the Python/npm license-policy checks.
+      # Backend lint and tests (including golden cases and real-FFmpeg media tests with
+      # generated lavfi fixtures), generated-contract drift check, frontend lint, type
+      # check, tests and production build, and the Python/npm license-policy checks.
       - name: Run all checks
         run: npm test

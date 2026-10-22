@@ -1,0 +1,76 @@
+{
+  "description": "WAV with cuts, speed and mute.",
+  "probe": {
+    "duration_seconds": 60.0,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "width": 1920,
+    "height": 1080,
+    "rotation": 0,
+    "has_audio": true,
+    "vfr": false,
+    "video_codec": "h264",
+    "audio_codec": "aac"
+  },
+  "edl": {
+    "version": 1,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "segments": [
+      {
+        "id": "s1",
+        "start": 0,
+        "end": 300,
+        "speed": 1.0,
+        "mute": false
+      },
+      {
+        "id": "s2",
+        "start": 300,
+        "end": 600,
+        "speed": 2.0,
+        "mute": true
+      },
+      {
+        "id": "s3",
+        "start": 900,
+        "end": 1200,
+        "speed": 0.5,
+        "mute": false
+      }
+    ],
+    "crop": null
+  },
+  "options": {
+    "format": "wav",
+    "quality": "high",
+    "encoder": "libx264",
+    "input_path": "input.mp4",
+    "output_path": "output.wav"
+  },
+  "expected_args": [
+    "-hide_banner",
+    "-nostdin",
+    "-y",
+    "-progress",
+    "pipe:1",
+    "-nostats",
+    "-i",
+    "input.mp4",
+    "-filter_complex",
+    "[0:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit=2[a0][a2];[a0]atrim=start=0:end=10.01,asetpts=PTS-STARTPTS[sa0];anullsrc=r=48000:cl=stereo,atrim=duration=5.005[sa1];[a2]atrim=start=30.03:end=40.04,asetpts=PTS-STARTPTS,atempo=0.5,apad,atrim=end=20.02[sa2];[sa0][sa1][sa2]concat=n=3:v=0:a=1[aout]",
+    "-map",
+    "[aout]",
+    "-c:a",
+    "pcm_s16le",
+    "-ar",
+    "48000",
+    "-ac",
+    "2",
+    "output.wav"
+  ]
+}

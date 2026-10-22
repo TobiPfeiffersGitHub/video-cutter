@@ -1,0 +1,78 @@
+{
+  "description": "One frame segment.",
+  "probe": {
+    "duration_seconds": 60.0,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "width": 1920,
+    "height": 1080,
+    "rotation": 0,
+    "has_audio": true,
+    "vfr": false,
+    "video_codec": "h264",
+    "audio_codec": "aac"
+  },
+  "edl": {
+    "version": 1,
+    "fps": {
+      "num": 30000,
+      "den": 1001
+    },
+    "segments": [
+      {
+        "id": "s1",
+        "start": 100,
+        "end": 101,
+        "speed": 1.0,
+        "mute": false
+      }
+    ],
+    "crop": null
+  },
+  "options": {
+    "format": "mp4",
+    "quality": "high",
+    "encoder": "libx264",
+    "input_path": "input.mp4",
+    "output_path": "output.mp4"
+  },
+  "expected_args": [
+    "-hide_banner",
+    "-nostdin",
+    "-y",
+    "-progress",
+    "pipe:1",
+    "-nostats",
+    "-i",
+    "input.mp4",
+    "-filter_complex",
+    "[0:v]fps=30000/1001,settb=AVTB[v0];[v0]trim=start=3.336666:end=3.370033,setpts=PTS-STARTPTS[sv0];[0:a]aformat=sample_rates=48000:channel_layouts=stereo[a0];[a0]atrim=start=3.336666:end=3.370033,asetpts=PTS-STARTPTS[sa0];[sv0][sa0]concat=n=1:v=1:a=1[vcat][aout];[vcat]format=yuv420p[vout]",
+    "-map",
+    "[vout]",
+    "-map",
+    "[aout]",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "medium",
+    "-crf",
+    "18",
+    "-pix_fmt",
+    "yuv420p",
+    "-fps_mode",
+    "cfr",
+    "-r",
+    "30000/1001",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-ar",
+    "48000",
+    "-movflags",
+    "+faststart",
+    "output.mp4"
+  ]
+}

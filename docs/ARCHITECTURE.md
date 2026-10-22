@@ -2,7 +2,8 @@
 
 This document describes the architecture decided in `SYSTEM_PROMPT.md` and marks
 what exists today. **Currently implemented: the application shell, CI, the
-tool-aware health route, and the typed EDL contract.**
+tool-aware health route, the typed EDL contract, and the tested FFmpeg
+rendering core (argument builder, golden cases, generated fixtures).**
 
 ## Decided design
 
@@ -28,10 +29,13 @@ backend/
   app/openapi.py     OpenAPI build (adds the EDL models to components)
   app/contract_gen.py  writes contract/openapi.json
   app/api/health.py  GET /api/v1/health
-  app/core/          pure domain logic: edl.py, timecode.py, toolchain.py
-  tests/             pytest
+  app/core/          pure domain logic: edl.py, timecode.py, toolchain.py,
+                     probe.py (ffprobe JSON -> ProbeData), render.py (argument builder)
+  tests/             pytest; fixtures_gen.py makes lavfi media, test_golden.py and
+                     test_render_media.py check the builder
 contract/
   edl.schema.json    EDL source of truth (hand-written JSON Schema)
+  golden/            language-neutral {probe, edl, options} -> exact FFmpeg args
   openapi.json       generated; do not edit
 frontend/
   src/               React shell; src/api/ holds the typed-fetch helpers
@@ -90,7 +94,52 @@ rendering.
   `npm run contract`. `npm test` runs the same generation into a temp directory
   and fails if the committed files differ (drift check, also run by CI).
 
+## Rendering core
+
+`core/render.py` turns `ProbeData` + `Edl` + `RenderOptions` into a `RenderPlan`: the
+argument list (without the executable), the single `filter_complex`, the expected
+output duration and size. It is pure: it runs nothing and adds no route. `core/probe.py`
+normalizes `ffprobe -print_format json -show_format -show_streams` into `ProbeData`.
+
+- **Graph.** `[0:v]fps,settb,split` -> per segment `trim` + `setpts` (+ `fps` when speed
+  differs from 1) -> `concat` -> `crop` -> `format=yuv420p`. Audio: 48 kHz stereo
+  `aformat`, `asplit` only for unmuted segments, `atrim`/`asetpts`/`atempo` chains, and
+  `anullsrc` + `atrim` silence for muted ones. `atempo` stages stay within 0.5..2.
+- **Time.** Seconds are `frame * den / num`, floored to microseconds. Video is first
+  normalized to the project rate, so cuts are exact on project frames, including VFR sources.
+- **Speed.** Three pitfalls were found by running real FFmpeg and are fixed in the graph (see
+  the module docstring): the one-frame time base after `fps` (needs `settb=AVTB`);
+  `setpts` leaving frame durations unchanged (needs a per-segment `fps`); and per-segment
+  rounding accumulating (28 segments at 1.5x came out 19 frames too long). Segment lengths
+  are therefore whole output frames with the fraction carried across segments
+  (`output_frame_counts`), forced with `tpad` + `trim=end_frame` on video and `apad` +
+  `atrim` on audio. Total length stays within half a frame of `sum((end - start) / speed)`.
+  Speeding up uses `round=up` (4x keeps source frames 0, 4, 8, ...; 1.5x keeps
+  `floor(1.5 k)`), slowing down `round=near`. A segment always emits at least one frame.
+- **Audio policy.** MP4 from a source with audio always has an audio stream (muted
+  segments are silent); MP4 from a source without audio is video-only; WAV from a source
+  without audio is silence of the expected duration, so a WAV export never fails for lack of audio.
+- **Crop.** Normalized crop is applied to the *displayed* frame (stored size swapped for
+  90/270 rotation). Pixels: round half up, then down to even, minimum 2, clamped inside the
+  even frame. Without a crop an odd displayed size is trimmed to even (yuv420p needs it).
+- **Encoders.** Options are per encoder and never shared: libx264 `-preset/-crf`,
+  libopenh264 `-b:v`, libsvtav1 `-preset/-crf`, h264_nvenc `-rc vbr -cq`, h264_qsv
+  `-global_quality`. Quality presets are `high` (CRF 18, `medium`) and `fast` (CRF 23,
+  `veryfast`) for libx264. Only libx264, libopenh264 (if present) and libsvtav1 (if
+  present) are exercised against real FFmpeg in tests; the hardware encoders and the
+  non-x264 option sets are covered by golden argument lists only.
+- **Initial VFR policy.** A source whose average and declared frame rates differ is VFR and
+  uses the declared (base) rate as the project rate. Rendering normalizes to that rate with
+  CFR output, so cut boundaries are accurate to one frame. The media pipeline package may refine it.
+- **Golden cases.** `contract/golden/*.json` (format in its README) must produce exactly
+  their argument lists; a future non-Python backend must pass them too.
+- **Fixtures.** `backend/tests/fixtures_gen.py` makes `normal`, `no_audio`, `rotated`,
+  `vfr` and `vfr_fast` (declared 60 fps, average ~31) clips from `testsrc2` + `sine` only. Each frame carries a 16-bit barcode (and a
+  human-readable number when a font file is found), so tests read back which source frame
+  every output frame is. `npm run fixtures` writes them to `backend/tests/.generated/`
+  (git-ignored). Pytest keeps its temp files in `backend/.pytest_tmp/` (git-ignored) instead of
+  the shared `%TEMP%` tree. The media tests **fail, not skip,** when FFmpeg/ffprobe/libx264/aac are missing.
+
 ## Not implemented yet
 
-Rendering core, persistence, uploads, jobs, proxies, timeline UI, export,
-authentication, and deployment.
+Persistence, uploads, jobs, proxies, timeline UI, export, authentication, and deployment.
