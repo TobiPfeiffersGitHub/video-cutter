@@ -6,17 +6,19 @@ Licensed under MIT (see [LICENSE](LICENSE)).
 
 ## Status
 
-Early development. **Only the project foundation exists:** a FastAPI backend
-with one liveness route, a React/Vite/Tailwind application shell, and CI.
-**Not implemented yet:** FFmpeg health check, upload, preview, timeline,
-editing, crop, export, projects, and authentication.
+Early development. **Implemented:** a FastAPI backend with a liveness route and
+`GET /api/v1/health` (FFmpeg/ffprobe versions, encoders, limits), the EDL
+contract (JSON Schema, Pydantic models, frame/time helpers, generated OpenAPI and
+TypeScript types), a React/Vite/Tailwind application shell, and CI.
+**Not implemented yet:** rendering, upload, preview, timeline, editing, crop,
+export, projects, and authentication.
 
 ## Prerequisites
 
 - Python 3.11+ (CI uses 3.12)
 - Node.js 20.19+ or 22.12+ (see `.nvmrc`)
-- FFmpeg and ffprobe, installed separately (not bundled; not yet required to
-  start the app). Windows: `winget install Gyan.FFmpeg`. Debian/Ubuntu:
+- FFmpeg and ffprobe, installed separately (not bundled; the app starts without it
+  but `/api/v1/health` reports `degraded`). Windows: `winget install Gyan.FFmpeg`. Debian/Ubuntu:
   `sudo apt install ffmpeg`. See [docs/RUNNING_WINDOWS.md](docs/RUNNING_WINDOWS.md).
 
 ## Quick start
@@ -34,9 +36,9 @@ overrides; the scripts read ordinary environment variables
 
 ## Troubleshooting
 
-- **FFmpeg not found** (relevant from the health-check package on): install it
+- **FFmpeg not found** (`/api/v1/health` shows `degraded` with a hint): install it
   and open a new terminal, or set `FFMPEG_PATH` / `FFPROBE_PATH` to the
-  executables. Not yet needed for the current shell.
+  executables. Restart the backend afterwards, since tools are discovered once at startup.
 - **Port in use:** `npm run dev` refuses to start and names the port. Stop the
   other process or set `VIDEOCUT_PORT` (backend, default 8000) /
   `VIDEOCUT_FRONTEND_PORT` (frontend, default 5173).

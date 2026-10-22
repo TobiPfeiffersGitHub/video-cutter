@@ -11,6 +11,7 @@
     "setup": "node scripts/setup.mjs",
     "dev": "node scripts/dev.mjs",
     "test": "node scripts/test.mjs",
-    "licenses": "node scripts/check-licenses.mjs"
+    "licenses": "node scripts/check-licenses.mjs",
+    "contract": "node scripts/generate-contract.mjs"
   }
 }
